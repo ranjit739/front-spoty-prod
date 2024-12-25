@@ -58,7 +58,7 @@ const Dashboard = () => {
     else if (!accessToken) {
       loginSpotify();
     }
-  }, [code, accessToken]);
+  }, [ accessToken]);
   
   // Handle search input change
   const handleSearchChange = (event) => {
