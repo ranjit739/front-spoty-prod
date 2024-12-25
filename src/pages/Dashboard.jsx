@@ -4,6 +4,8 @@ import { CLIENT_ID, CLIENT_SECRET, REDIRECT_URI } from '../config/config';
 import PlaylistCard from '../components/PlaylistCard';
 import { useNavigate } from 'react-router-dom';
 import { toast } from "react-toastify";
+import { fetchSongs } from '../services/service';
+
 const Dashboard = () => {
   const [accessToken, setAccessToken] = useState(null);
   const [searchQuery, setSearchQuery] = useState('tere naina');
@@ -14,6 +16,18 @@ const Dashboard = () => {
   const redirect_uri = REDIRECT_URI;
   const code = new URLSearchParams(window.location.search).get('code'); // Get the `code` from URL query params
   const navigate = useNavigate();
+
+
+  const fetechSongs=async()=>{
+  try {
+    const res=await axios.get(`https://spotynode.onrender.com/api/track/query=${searchQuery}`)
+    console.log(res.data)
+    setSearchResults(response.data.tracks.items);
+  } catch (error) {
+    
+  }
+  }
+
 
   // Function to automatically log in to Spotify
   const loginSpotify = () => {
@@ -66,26 +80,11 @@ const Dashboard = () => {
   };
 
   // Handle search submission
-  const handleSearchSubmit = () => {
-    if (!searchQuery || !accessToken) return;
+  const handleSearchSubmit = async() => {
+    if (!searchQuery) return;
+const res =await fetchSongs(searchQuery)
+setSearchResults(res.data.tracks.items);
 
-    axios
-      .get('https://api.spotify.com/v1/search', {
-        params: {
-          q: searchQuery,
-          type: 'track',
-          limit: 10,
-        },
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      })
-      .then((response) => {
-        setSearchResults(response.data.tracks.items);
-      })
-      .catch((error) => {
-        console.error('Error searching for songs:', error);
-      });
   };
 
 
