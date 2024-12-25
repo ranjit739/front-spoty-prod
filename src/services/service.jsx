@@ -143,6 +143,18 @@ export const updateSongInPlaylist = async (id, data) => {
     throw error.response?.data.error || error.message;
   }
 };
+// Get Song Service
+export const fetchSongs = async (query) => {
+  try {
+    const response = await axiosInstance.get(`${API_ENDPOINTS.TRACKS}?query=${encodeURIComponent(query)}`);
+    
+    return response.data;
+  } catch (error) {
+    toast.error(error.response?.data.error || 'Failed to fetch songs');
+    throw error.response?.data.error || error.message;
+  }
+};
+
 // Add Song to Playlist Service
 export const addSongToPlaylist = async (playlistId, track) => {
   try {
@@ -159,4 +171,7 @@ export const addSongToPlaylist = async (playlistId, track) => {
     toast.error(error.response?.data?.message || 'Failed to add song to playlist');
     throw error.response?.data?.message || error.message || 'Failed to add song to playlist';
   }
+
+
+  
 };
