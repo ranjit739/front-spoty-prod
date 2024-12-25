@@ -1,93 +1,35 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react';
-import axios from 'axios';
-import { CLIENT_ID, CLIENT_SECRET, REDIRECT_URI } from '../config/config';
+import React, {useState } from 'react';
+
 import PlaylistCard from '../components/PlaylistCard';
-import { useNavigate } from 'react-router-dom';
-import { toast } from "react-toastify";
 import { fetchSongs } from '../services/service';
 
 const Dashboard = () => {
-  const [accessToken, setAccessToken] = useState(null);
+  
   const [searchQuery, setSearchQuery] = useState('tere naina');
   const [searchResults, setSearchResults] = useState([]);
   const [playlists, setPlaylists] = useState([]);
-  const clientId = CLIENT_ID;
-  const clientSecret = CLIENT_SECRET;
-  const redirect_uri = REDIRECT_URI;
-  const code = new URLSearchParams(window.location.search).get('code'); // Get the `code` from URL query params
-  const navigate = useNavigate();
-
-
-  const fetechSongs=async()=>{
-  try {
-    const res=await axios.get(`https://spotynode.onrender.com/api/track/query=${searchQuery}`)
-    console.log(res.data)
-    setSearchResults(response.data.tracks.items);
-  } catch (error) {
-    
-  }
-  }
-
-
-  // Function to automatically log in to Spotify
-  const loginSpotify = () => {
-    const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirect_uri}&scope=user-library-read user-library-modify playlist-read-private playlist-modify-public playlist-modify-private user-read-playback-state user-modify-playback-state`;
-    window.location.href = authUrl; // Automatically redirect the user to Spotify's login page
-  };
-
-  useLayoutEffect(() => {
-    const fetchAccessToken = async () => {
-      try {
-        const base64Credentials = new TextEncoder().encode(`${clientId}:${clientSecret}`);
-        const base64String = btoa(String.fromCharCode(...base64Credentials));
+  const [loading, setLoading] = useState(false); // State for loader
   
-        const response = await axios.post(
-          'https://accounts.spotify.com/api/token',
-          new URLSearchParams({
-            code,
-            redirect_uri,
-            grant_type: 'authorization_code',
-          }),
-          {
-            headers: {
-              Authorization: `Basic ${base64String}`,
-              'Content-Type': 'application/x-www-form-urlencoded',
-            },
-          }
-        );
-        toast.success("Now you can search for your favorite songs!")
-        console.log("now you can search")
-        setAccessToken(response.data.access_token);
-      } catch (error) {
-       
-        console.error('Error getting access token:', error);
-      }
-    };
-  
-    // If `code` exists in the URL, exchange it for an access token
-    if (code) {
-      fetchAccessToken();
-    } 
-    // If there is no `code` and the user doesn't have an access token, trigger Spotify login
-    else if (!accessToken) {
-      loginSpotify();
-    }
-  }, [ accessToken]);
-  
+
+
   // Handle search input change
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
   };
 
   // Handle search submission
-  const handleSearchSubmit = async() => {
+  const handleSearchSubmit = async () => {
     if (!searchQuery) return;
-const res =await fetchSongs(searchQuery)
-setSearchResults(res.data.tracks.items);
-
+    setLoading(true); // Start loading
+    try {
+      const res = await fetchSongs(searchQuery);
+      setSearchResults(res.data.tracks.items);
+    } catch (error) {
+      console.error('Error fetching songs:', error);
+    } finally {
+      setLoading(false); // Stop loading
+    }
   };
-
-
 
   return (
     <div
@@ -96,7 +38,6 @@ setSearchResults(res.data.tracks.items);
         display: 'flex',
         flexDirection: 'column',
         background: 'linear-gradient(to bottom, #1d1d1d, #121212)', // Gradient background
-
         color: '#fff',
         minHeight: '100vh',
       }}
@@ -126,13 +67,24 @@ setSearchResults(res.data.tracks.items);
           }}
         />
         <button
-        onClick={handleSearchSubmit}
-        style={{ marginBottom: '20px' }}
-        className="border border-white text-white px-4 py-2 rounded-lg  hover:text-black transition-all"
-      >
-        Search
-      </button>
-      
+          onClick={handleSearchSubmit}
+          style={{
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          className="border border-white text-white px-4 py-2 rounded-lg hover:text-black transition-all"
+          disabled={loading} // Disable button while loading
+        >
+          {loading ? (
+            <span className="loader" style={{ marginLeft: '5px', fontSize: '14px' }}>
+              Loading...
+            </span>
+          ) : (
+            'Search'
+          )}
+        </button>
 
         {/* Display Playlist Cards */}
         {playlists.length > 0 && (
