@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {  signupUser } from '../../services/authService.jsx';
 import BtnLoader from '../../component/BtnLoader.jsx';
 import { toast } from 'react-toastify';
@@ -13,7 +13,7 @@ const Signup = () => {
     password: '',
     confirmPassword: '',
   });
-
+const navigate=useNavigate()
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -35,6 +35,7 @@ const Signup = () => {
       // Call the signup service
       const response = await signupUser(formData);
       toast.success("Signup successful! Welcome aboard!"); // Success toast
+      navigate("/login")
   
     } catch (error) {
       // Handle errors
